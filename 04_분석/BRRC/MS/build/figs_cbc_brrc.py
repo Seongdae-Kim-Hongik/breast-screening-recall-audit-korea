@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-# figs_jms_brrc.py (JMS 재투고 11/18: 패널 대문자 A,B,C, 출력 out_jms)
-# 원본 figs_brrc.py — BRRC European Radiology 그림(2026-11-13, figs_sknd 이식). 컬러, 패널 문자 = fig.text 상수 PANEL_LABEL_PT(모든 패널 같은 크기·굵기),
-#  European Radiology 지침("panels ... indicated with a lowercase letter ... captions using the same lowercase letters bolded") → 소문자 a, b, c(저자 대문자 규칙의 예외, 포바포 표 기록).
+# figs_cbc_brrc.py (재투고판 11/18: 패널 대문자 A,B,C, 출력 out_cbc, 파일 Figure_1.tif)
 #  방위표 3배, 그림 안 설명문 없음, 시군구 결합은 코드로만. TIFF: 지도·그래프 600 dpi, 순서도 1200 dpi.
 #  Fig 1 순서도 · Fig 2 (a) 전국 판정유보율 (b) 연령별 판정유보율 2011·2017·2024 · Fig 3 지도 (a) 연령표준화 SIR (b) 잔차 공간 RR (c) 핫·콜드스팟
 #  Fig 4 (a) 판정유보 SIR 대 유방암 의심 SIR (b) 판정유보 사분위별 판정유보 1,000건당 의심 · Fig 5 주요 변수 모형별 RR
@@ -13,7 +11,7 @@ from matplotlib.lines import Line2D
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
 from numbers_brrc import load, SHP, PAN, RS, B
-HERE = os.path.dirname(os.path.abspath(__file__)); FIG = os.path.join(HERE, "figs_jms"); OUTF = os.path.join(os.path.dirname(HERE), "out_jms", "Figures"); os.makedirs(FIG, exist_ok=True); os.makedirs(OUTF, exist_ok=True)
+HERE = os.path.dirname(os.path.abspath(__file__)); FIG = os.path.join(HERE, "figs_cbc"); OUTF = os.path.join(os.path.dirname(HERE), "out_cbc", "Figures"); os.makedirs(FIG, exist_ok=True); os.makedirs(OUTF, exist_ok=True)
 MM = 1 / 25.4; W = 170 * MM; DPI = 600; LW = 0.3
 PANEL_LABEL_PT = 54
 plt.rcParams.update({"font.family": "Arial", "font.size": 9, "legend.fontsize": 8, "legend.title_fontsize": 8.5, "axes.linewidth": 0.6, "pdf.fonttype": 42})
@@ -35,8 +33,8 @@ def mapax(ax):
     ax.add_patch(Polygon([[nx - nw / 2, ny], [nx, ny + nh], [nx + nw / 2, ny], [nx, ny + 0.25 * nh]], closed=True, facecolor="black", edgecolor="black", lw=0.4))
     ax.text(nx, ny + nh + 0.012 * H_, "N", ha="center", va="bottom", fontsize=22, fontweight="bold")
 def save(fig, k, dpi=DPI):
-    p = os.path.join(FIG, f"JMS_Fig{k}.png"); fig.savefig(p, dpi=dpi, facecolor="white"); plt.close(fig)
-    im = Image.open(p).convert("RGB"); im.save(p, dpi=(dpi, dpi)); im.save(os.path.join(OUTF, f"Figure{k}.tif"), dpi=(dpi, dpi), compression="tiff_lzw"); return im.size
+    p = os.path.join(FIG, f"Fig{k}.png"); fig.savefig(p, dpi=dpi, facecolor="white"); plt.close(fig)
+    im = Image.open(p).convert("RGB"); im.save(p, dpi=(dpi, dpi)); im.save(os.path.join(OUTF, f"Figure_{k}.tif"), dpi=(dpi, dpi), compression="tiff_lzw"); return im.size
 fmt = lambda x: f"{x:,}".replace(",", " ")
 
 # Fig 1 순서도

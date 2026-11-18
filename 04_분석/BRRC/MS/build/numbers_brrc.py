@@ -1,4 +1,4 @@
-# numbers_brrc.py — BRRC European Radiology 원고의 모든 수치를 결과 CSV에서 읽는다(2026-11-13, numbers_sknd 구조 이식). 손입력 금지, assert로 정합 확인.
+# numbers_brrc.py — BRRC 원고의 모든 수치를 결과 CSV에서 읽는다(2026-11-13, numbers_sknd 구조 이식). 손입력 금지, assert로 정합 확인.
 import os, glob, json, numpy as np, pandas as pd
 from scipy.stats import spearmanr
 HERE = os.path.dirname(os.path.abspath(__file__)); B = os.path.dirname(os.path.dirname(HERE)); RS = os.path.join(B, "results_std3")

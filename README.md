@@ -2,9 +2,9 @@
 
 Analysis code for the manuscript
 
-> Kim S. *Do Korean districts that recall more women at breast screening find more suspected cancers?* Manuscript submitted for publication.
+> Kim S. *Do Korean districts that recall more women at breast screening also record more suspicious mammograms?* Manuscript submitted for publication.
 
-Archived version: Zenodo, https://doi.org/10.5281/zenodo.24332133 (v1.0.0).
+Archived version: Zenodo, https://doi.org/10.5281/zenodo.24332340 (v1.0.1).
 
 ## Contents
 
@@ -42,8 +42,8 @@ Run from the repository root (set `ST_DATA_ROOT`, `ST_FBDZIP_CORRECTED` and `ST_
 | 6 | `85_window_maps.R`, `86_yearly_maps_ehsa.py`, `87_window_grid.py` | Period and yearly maps |
 | 7 | `88g_sens_prep.py`, `88g_sens_suite.R`, `88h_ppc_varpart.R`, `88k_struct_kh.R`, `89g_sens_combine.py` | Sensitivity analyses (province-by-year effect, likelihood, temporal structure, lags, Spatial+, leave-one-out, Knorr-Held interactions, comparison outcomes) |
 | 8 | `50D_brrc_aux.py` | Recall versus suspicious judgements, 2020 stability, between-province variance |
-| 8b | `04_분석/BRRC/MS/build/gate_judgement_brrc.py` | National judgement composition by year (BI-RADS categories of the programme) checked against the published programme recall rate |
-| 9 | `04_분석/BRRC/MS/build/run_all_jms_brrc.sh` | Manuscript numbers, tables, figures and supplementary material |
+| 8b | `04_분석/BRRC/MS/build/gate_judgement_brrc.py`, `rho_boot_brrc.py` (bootstrap interval of the recall–suspicious correlation) | National judgement composition by year (BI-RADS categories of the programme) checked against the published programme recall rate |
+| 9 | `04_분석/BRRC/MS/build/run_all_cbc_brrc.sh` | Manuscript numbers, tables, figures and supplementary material |
 
 The whole chain is `04_분석/BRRC/run_std3_chain.sh`. Software: R 4.6.0, R-INLA 25.10.19, Python 3.9.
 

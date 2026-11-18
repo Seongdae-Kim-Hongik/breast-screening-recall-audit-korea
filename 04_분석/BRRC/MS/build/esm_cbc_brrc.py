@@ -1,10 +1,10 @@
-# esm_jms_brrc.py — BRRC J Med Screening 재투고 보충 자료(Appendix S1·Table S1 전국 판정 구성(게이트)·S2–S5) + STROBE(2026-11-18, esm_brrc 이식).
+# esm_cbc_brrc.py — BRRC 재투고 보충 자료(Clinical Breast Cancer)(Appendix S1·Table S1 전국 판정 구성(게이트)·S2–S5) + STROBE(2026-11-18, esm_brrc 이식).
 #  수치는 결과 CSV에서만. 표 제목 쌍점 금지. 보충 번호 = 본문 첫 인용 순서(S1 공변량 → S2 우도 → S3 사양 → S4 핫스팟).
 import os, re, json, subprocess, pandas as pd
 import numbers_brrc as NB
-from build_jms_brrc import N, TX, TITLE as DTITLE, foot_row, GROUPS, METHODS, results, f3
-HERE = os.path.dirname(os.path.abspath(__file__)); MSD = os.path.dirname(HERE); OUT = os.path.join(MSD, "out_jms"); B = os.path.dirname(MSD); RS = os.path.join(B, "results_std3")
-J = TX(cite="sup")
+from build_cbc_brrc import N, TX, TITLE as DTITLE, foot_row, GROUPS, METHODS, results, f3
+HERE = os.path.dirname(os.path.abspath(__file__)); MSD = os.path.dirname(HERE); OUT = os.path.join(MSD, "out_cbc"); B = os.path.dirname(MSD); RS = os.path.join(B, "results_std3")
+J = TX(cite="bracket")
 def TF(title, header, rows, foot="", fs=8, orient=None):
     (J.new_page(orient) if orient else J.page_break()); J.table_fit(title, header, rows, "", fs_max=fs, title_bold=True)
     if foot: foot_row(J, foot, 8, 12)
@@ -34,7 +34,7 @@ J.para("<b>Additional results.</b> " + f"The period from 2020 had no credible ma
        f"The district standardised recall ratios (SRRs) of recall and of cervical cytological abnormality at the same programme were correlated at ρ = {AX['recall_vs_CXAB_rho']:.2f}. "
        f"The share of the variance of the annual log SRR between provinces averaged {100*AX['between_province_share_logSIR_yearly_mean_min_max'][0]:.0f}% (range {100*AX['between_province_share_logSIR_yearly_mean_min_max'][1]:.0f}%–{100*AX['between_province_share_logSIR_yearly_mean_min_max'][2]:.0f}%).")
 # Table S1 전국 판정 구성(판정 구성 대조 게이트, gate_judgement_brrc.py)
-JC = pd.read_csv(os.path.join(OUT, "S5_judgement_composition.csv"), encoding="utf-8-sig")
+JC = pd.read_csv(os.path.join(OUT, "judgement_composition.csv"), encoding="utf-8-sig")
 rows = [[str(int(r.year)), f"{int(r.screened):,}".replace(",", " "), f"{r.normal:.2f}", f"{r.benign:.2f}", f"{r.recall:.2f}", f"{r.suspicious:.2f}", f"{r.existing:.2f}", f"{r.recall_plus_susp:.2f}", "–" if pd.isna(r.KJR_RR) else f"{r.KJR_RR:.2f}"] for r in JC.itertuples()]
 TF("Table S1 National judgement categories at breast cancer screening by year, Republic of Korea, 2011–2024", ["Year", "Women screened", "No abnormality, %", "Benign, %", "Recall, %", "Suspected cancer, %", "Existing cancer, %", "Recall + suspected, %", "Published recall rate, %<sup>a</sup>"], rows,
    "Categories follow the programme's quality guidelines: no abnormality, BI-RADS 1; benign, BI-RADS 2; recall ('judgement deferred'), BI-RADS 0 and 3; suspected cancer, BI-RADS 4 and 5. The four categories sum to the number screened; women with existing breast cancer are reported separately and expressed per 100 women screened. "
@@ -91,23 +91,23 @@ for cls, lab in (("hotspot", "Hot spots"), ("coldspot", "Cold spots")):
 TF("Table S5 Residual hot spots and cold spots of breast screening recall, 229 districts, Republic of Korea, 2011–2024", ["Province", "District", "Residual spatial RR (95% CrI)", "P(RR > 1)", "Observed SRR"], rows,
    "RR, rate ratio from the district effect of the principal model; CrI, credible interval; SRR, standardised recall ratio (observed over age-standardised expected recalls) over 14 years. Hot spots: posterior probability of RR > 1 above 0.95; cold spots: below 0.05. Exploratory; not adjusted for multiple comparisons.", fs=7, orient="portrait")
 assert not any(re.search(r"[가-힣]", str(c)) for r in rows for c in r[1:] if r[0] != "__H__")
-ps = os.path.join(OUT, "Supplementary_Material_JMS_BRRC.docx"); J.doc_title = "Supplementary material"; J.save(ps)
-subprocess.run(["/opt/homebrew/bin/soffice", "--headless", "-env:UserInstallation=file:///tmp/lo_brrc_esmj", "--convert-to", "pdf", "--outdir", OUT, ps], check=True, capture_output=True)
+ps = os.path.join(OUT, "Supplementary_Material_BRRC.docx"); J.doc_title = "Supplementary material"; J.save(ps)
+subprocess.run(["/opt/homebrew/bin/soffice", "--headless", "-env:UserInstallation=file:///tmp/lo_brrc_esmc", "--convert-to", "pdf", "--outdir", OUT, ps], check=True, capture_output=True)
 print("saved", os.path.basename(ps))
 # STROBE
 MH = [x[0] for x in METHODS]; RH = [x[0] for x in results()]
 CK = [("Title and abstract", "1", "Title page; Abstract"), ("Background/rationale", "2", "Introduction"), ("Objectives", "3", "Introduction, final paragraph"),
-      ("Study design", "4", f"Methods, {MH[0]}"), ("Setting", "5", f"Methods, {MH[0]}; {MH[1]}"), ("Participants", "6", f"Methods, {MH[1]} (all women screened; ecological)"),
-      ("Variables", "7", f"Methods, {MH[2]}; {MH[3]}; Supplementary Table S2"), ("Data sources/measurement", "8", f"Methods, {MH[1]}; Supplementary Appendix S1; Supplementary Table S1"),
-      ("Bias", "9", f"Methods, {MH[4]}; Supplementary Table S4"), ("Study size", "10", f"Methods, {MH[0]} (all 229 districts)"), ("Quantitative variables", "11", f"Methods, {MH[3]}"),
-      ("Statistical methods", "12", f"Methods, {MH[4]}; Supplementary Appendix S1; Supplementary Table S3"), ("Participants (flow)", "13", "Results, first paragraph; Fig. 1 (no exclusions)"),
+      ("Study design", "4", f"Materials and Methods, {MH[0]}"), ("Setting", "5", f"Materials and Methods, {MH[0]}; {MH[1]}"), ("Participants", "6", f"Materials and Methods, {MH[1]} (all women screened; ecological)"),
+      ("Variables", "7", f"Materials and Methods, {MH[2]}; {MH[3]}; Supplementary Table S2"), ("Data sources/measurement", "8", f"Materials and Methods, {MH[1]}; Supplementary Appendix S1; Supplementary Table S1"),
+      ("Bias", "9", f"Materials and Methods, {MH[4]}; Supplementary Table S4"), ("Study size", "10", f"Materials and Methods, {MH[0]} (all 229 districts)"), ("Quantitative variables", "11", f"Materials and Methods, {MH[3]}"),
+      ("Statistical methods", "12", f"Materials and Methods, {MH[4]}; Supplementary Appendix S1; Supplementary Table S3"), ("Participants (flow)", "13", "Results, first paragraph; Fig. 1 (no exclusions)"),
       ("Descriptive data", "14", f"Results, {RH[0]}; Table 1"), ("Outcome data", "15", f"Results, {RH[0]}; Table 1; Fig. 2"),
       ("Main results", "16", f"Results, {RH[1]}; {RH[2]}; Table 2; Figs. 3–5"), ("Other analyses", "17", f"Results, {RH[3]}; {RH[4]}; Supplementary Tables S3–S5"),
       ("Key results", "18", "Discussion, first paragraph"), ("Limitations", "19", "Discussion, third paragraph"), ("Interpretation", "20", "Discussion, second paragraph"), ("Generalisability", "21", "Conclusions"),
-      ("Other information (funding, code)", "22", "Statements and Declarations (Funding; Data availability)")]
-K = TX(cite="sup"); K.para("<b>STROBE checklist</b>"); K.para(f"Manuscript \"{DTITLE}\"")
+      ("Other information (funding, code)", "22", "Funding; Data availability")]
+K = TX(cite="bracket"); K.para("<b>STROBE checklist</b>"); K.para(f"Manuscript \"{DTITLE}\"")
 K.table_fit("STROBE checklist for this ecological study", ["Item", "No.", "Where reported"], [[a, b, c] for a, b, c in CK], "", fs_max=9, title_bold=True)
 foot_row(K, "STROBE, Strengthening the Reporting of Observational Studies in Epidemiology. Section names refer to the main manuscript and the supplementary material.", 8, 12)
-pk = os.path.join(OUT, "STROBE_Checklist_JMS_BRRC.docx"); K.doc_title = "STROBE checklist"; K.save(pk)
-subprocess.run(["/opt/homebrew/bin/soffice", "--headless", "-env:UserInstallation=file:///tmp/lo_brrc_esmj", "--convert-to", "pdf", "--outdir", OUT, pk], check=True, capture_output=True)
+pk = os.path.join(OUT, "STROBE_Checklist_BRRC.docx"); K.doc_title = "STROBE checklist"; K.save(pk)
+subprocess.run(["/opt/homebrew/bin/soffice", "--headless", "-env:UserInstallation=file:///tmp/lo_brrc_esmc", "--convert-to", "pdf", "--outdir", OUT, pk], check=True, capture_output=True)
 print("saved", os.path.basename(pk))

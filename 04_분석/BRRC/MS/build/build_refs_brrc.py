@@ -1,8 +1,8 @@
-# build_refs_brrc.py — BRRC 참고문헌 메타데이터 캐시(refs_brrc.json). 키 = draft md + build_jms_brrc.py METHODS의 [@key] (11/18 JMS 재투고판으로 전환).
+# build_refs_brrc.py — BRRC 참고문헌 메타데이터 캐시(refs_brrc.json). 키 = draft md + build_cbc_brrc.py METHODS의 [@key] (11/18 재투고판).
 #  주제 문헌 = refs/brrc_refs_verified.csv(PubMed efetch 11/13, 초록 포함), 방법 문헌 = SKND 검증 캐시에서 복사.
 import os, re, json, csv
 HERE = os.path.dirname(os.path.abspath(__file__)); MS = os.path.dirname(HERE); AN = os.path.dirname(os.path.dirname(MS))
-src = open(os.path.join(HERE, "build_jms_brrc.py"), encoding="utf-8").read() + open(os.path.join(MS, "draft", "02_manuscript_jms.md"), encoding="utf-8").read()
+src = open(os.path.join(HERE, "build_cbc_brrc.py"), encoding="utf-8").read() + open(os.path.join(MS, "draft", "03_manuscript.md"), encoding="utf-8").read()
 src = re.sub(r"<!--.*?-->", "", src, flags=re.S)
 keys = sorted({k.strip().lstrip("@") for g in re.findall(r"\[(@[^\]]+)\]", src) for k in g.split(";")}); keys = [k for k in keys if re.fullmatch(r"[a-z][a-z0-9]*", k)]
 OLD = json.load(open(os.path.join(AN, "SKND/MS/build/refs_sknd.json"), encoding="utf-8"))

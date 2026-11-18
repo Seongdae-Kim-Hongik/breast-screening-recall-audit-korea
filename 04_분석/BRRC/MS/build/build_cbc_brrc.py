@@ -1,8 +1,7 @@
-# build_jms_brrc.py — BRRC Journal of Medical Screening 재투고 원고(2026-11-18, build_er_brrc.py 이식; EurRad EURA-D-26-06328 데스크 리젝 11/17).
-#  JMS 규정(journals.sagepub.com/author-instructions/MSC, 11/18 크롬 확인): 원저 본문 ≤4,000(초록·표·그림·참고문헌 제외), 구조 초록 ≤250(Objectives/Setting/Methods/Results/Conclusions), 키워드 ≥4,
-#   구조 Abstract·Introduction·Methods·Results·Discussion·Conclusions, Acknowledgements 뒤 Author contributions, 끝에 'Statements and Declarations'(Ethical considerations·Consent to participate·Consent for publication·
-#   Declaration of conflicting interest·Funding·Data availability, 해당 없으면 'Not applicable'), Sage Vancouver, 그림 300 dpi 이상, EQUATOR 체크리스트(STROBE) 업로드, 단일 익명, 저자 추천 심사자 받지 않음, 요금 없음.
-#  판정 구성 게이트(17 KIDS 교훈) 반영: BI-RADS 매핑·4범주+기존 암환자·전국 판정 구성 Table S1.
+# build_cbc_brrc.py — BRRC Clinical Breast Cancer(Elsevier) Original Study 원고(2026-11-18).
+#  CBC 규정(sciencedirect.com/journal/clinical-breast-cancer/publish/guide-for-authors, 11/18 크롬 확인): 본문 2,000–8,000단어, 그림+표 ≤8, 참고 ≤80, 초록 ≤250 = 개요 1–2문장(근거·방법과 표본 크기·주요 결과·임상 의의) + Introduction/Patients and Methods/Results/Conclusion,
+#   본문 Introduction·Patients (or Materials) and Methods·Results·Discussion·Conclusion, 키워드 1–7, 대괄호 번호 인용, Elsevier 번호 참고문헌(이니셜·성, 제목, 학술지 권 (연도) 쪽, DOI), CRediT, 연구비 표준 문장,
+#   AI 선언 절은 참고문헌 앞 별도 절, 지도 캡션에 경계 문구, 단일 익명, Highlights 3–5개 ≤85자(별도 파일), 경쟁 이해 선언 Word·ICMJE 양식.
 import os, re, json, subprocess, sys
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
@@ -10,12 +9,12 @@ from docx.shared import Pt
 from jkms_engine import JKMS
 from british import brit
 import numbers_brrc as NB
-HERE = os.path.dirname(os.path.abspath(__file__)); MS = os.path.dirname(HERE); OUT = os.path.join(MS, "out_jms"); os.makedirs(OUT, exist_ok=True)
+HERE = os.path.dirname(os.path.abspath(__file__)); MS = os.path.dirname(HERE); OUT = os.path.join(MS, "out_cbc"); os.makedirs(OUT, exist_ok=True)
 N = NB.load(); REFS = json.load(open(os.path.join(HERE, "refs_brrc.json"), encoding="utf-8"))
-DRAFT = os.path.join(MS, "draft", "02_manuscript_jms.md")
+DRAFT = os.path.join(MS, "draft", "03_manuscript.md")
 _zf = os.path.join(OUT, "zenodo_doi.txt"); ZENODO = open(_zf).read().strip() if os.path.exists(_zf) else "[ZENODO DOI]"
-TITLE = "Do Korean districts that recall more women at breast screening find more suspected cancers?"
-KEYWORDS = "Breast cancer screening; mammography; recall; false-positive results; quality assurance; spatial analysis"
+TITLE = "Do Korean districts that recall more women at breast screening also record more suspicious mammograms?"
+KEYWORDS = "Mammography; Mass screening; Recall; Quality assurance; Ecological study; Spatial analysis; Republic of Korea"
 assert ":" not in TITLE and len(TITLE.split()) <= 20
 ORCID = "0000-0002-1525-0091"
 AFFIL = "Department of Biohealth Convergence Open Sharing System, Hongik University, Seoul, Republic of Korea"
@@ -31,7 +30,9 @@ def rr4(t): return f"RR {t[0]:.3f}, 95% CrI {t[1]:.4f}–{t[2]:.3f}" if round(t[
 fmt = lambda x: f"{x:,}".replace(",", " ")
 AX = N["aux"]; T1 = N["T1"]; AR = N["agerate"]
 import pandas as pd
-JC = pd.read_csv(os.path.join(OUT, "S5_judgement_composition.csv"), encoding="utf-8-sig").set_index("year")   # gate_judgement_brrc.py
+RB = json.load(open(os.path.join(NB.RS, "S50R_rho_bootstrap.json")))   # rho_boot_brrc.py
+VIF_FAC = float(pd.read_csv(os.path.join(NB.B, "panel_META_BRRC_std3.csv"), encoding="utf-8-sig").set_index("variable").loc[NB.FAC, "vif_final"])
+JC = pd.read_csv(os.path.join(OUT, "judgement_composition.csv"), encoding="utf-8-sig").set_index("year")   # gate_judgement_brrc.py
 EN = {"서울시": "Seoul", "경기도": "Gyeonggi-do", "인천시": "Incheon", "강원도": "Gangwon-do", "충청남도": "Chungcheongnam-do", "충청북도": "Chungcheongbuk-do", "전라남도": "Jeollanam-do", "전라북도": "Jeollabuk-do",
       "경상남도": "Gyeongsangnam-do", "경상북도": "Gyeongsangbuk-do", "부산시": "Busan", "대구시": "Daegu", "광주시": "Gwangju", "대전시": "Daejeon", "울산시": "Ulsan", "세종시": "Sejong", "제주도": "Jeju-do"}
 def top(d, k=4): l = [f"{EN[a]} ({b})" for a, b in list(d.items())[:k]]; return ", ".join(l[:-1]) + " and " + l[-1]
@@ -39,16 +40,22 @@ HYP = NB.HYP; M = N["main"]
 n_null = sum(1 for v in HYP if not M[v][3])
 q = N["ppv_q"]
 
+ABSTRACT_LEAD = (f"Across {fmt(N['exam_total'])} screening mammograms in all {N['n_districts']} Korean districts, recall followed a stable district map that age and measured district characteristics did not account for, "
+                 "and districts that recalled more women did not record more examinations judged suspicious for cancer at screening.")
 ABSTRACT = [
- ("Objectives", "To test whether the district geography of recall at national breast cancer screening is accounted for by the age mix and by density-related, supply, deprivation and physical activity characteristics of districts."),
- ("Setting", f"National breast cancer screening programme, all {N['n_districts']} districts of the Republic of Korea, 2011–2024."),
- ("Methods", f"Ecological study of published aggregate data on {fmt(N['exam_total'])} screening mammograms. Recall ('judgement deferred', Breast Imaging Reporting and Data System categories 0 and 3) was age-standardised with national age-specific recall rates. "
-  "Bayesian spatial negative binomial models estimated associations with ten pre-specified district characteristics. District recall was compared with examinations judged suspicious for cancer."),
- ("Results", f"Of all examinations, {pct(N['cases_total']/N['exam_total'])} were recalled, falling from {T1['W1_2011-15']['rate']:.1f}% in 2011–2015 to {T1['W3_2020-24']['rate']:.1f}% in 2020–2024. "
-  f"District standardised recall ratios ranged from {T1['ALL']['p10']:.2f} to {T1['ALL']['p90']:.2f} (10th–90th percentile) and were nearly unchanged by age-standardisation (Spearman ρ {N['rho_crude_std']:.2f}). "
-  f"Residual hot spots clustered in the capital region and cold spots in the south. Nine of ten pre-specified characteristics had credible intervals including 1; public sports facilities per 100 000 were associated with higher recall (rate ratio {M[NB.FAC][0]:.3f}, 95% credible interval {M[NB.FAC][1]:.3f}–{M[NB.FAC][2]:.3f}), opposite to expectation, and post hoc decomposition showed a within-district but no between-district association. Recall was not correlated with suspicious judgements (ρ {AX['recall_vs_suspicion_rho']:.2f}); suspicious judgements per 1000 recalls were {q['Q1']['median']:.1f} in the lowest and {q['Q4']['median']:.1f} in the highest recall quarter."),
- ("Conclusions", "District recall formed a stable spatial pattern that persisted after adjustment for the measured district characteristics and was not accompanied by more suspicious judgements."),
+ ("Introduction", "Variation in recall is attributed to breast density or to reading practice; this study tested whether age mix and district characteristics account for district recall."),
+ ("Patients and Methods", f"Published aggregate data of the national programme, {N['n_districts']} districts, 2011–2024. Recall ('judgement deferred', Breast Imaging Reporting and Data System categories 0 and 3) was age-standardised with national age-specific rates. "
+  "Bayesian spatial negative binomial models estimated associations with ten pre-specified district characteristics, and recall was compared with suspicious judgements."),
+ ("Results", f"Recall fell from {T1['W1_2011-15']['rate']:.1f}% in 2011–2015 to {T1['W3_2020-24']['rate']:.1f}% in 2020–2024. District standardised recall ratios ranged from {T1['ALL']['p10']:.2f} to {T1['ALL']['p90']:.2f} (10th–90th percentile), kept their ranking after indirect age-standardisation (ρ {N['rho_crude_std']:.2f}) and clustered in the capital region. "
+  f"Nine of ten characteristics had credible intervals including 1; public sports facilities were associated with higher recall (rate ratio {M[NB.FAC][0]:.3f}, 95% credible interval {M[NB.FAC][1]:.3f}–{M[NB.FAC][2]:.3f}), within districts only. District recall showed little correlation with suspicious judgements (ρ {RB['rho']:.2f}, 95% bootstrap interval {RB['lo']:.2f} to {RB['hi']:.2f})."),
+ ("Conclusion", "District recall varied beyond district proxies for the age and composition of screened women and was not matched by more suspicious judgements; regional audit linking recall to reading facilities and confirmed cancers is needed to separate avoidable work-up from detection."),
 ]
+HIGHLIGHTS = ["Korean breast screening recall followed a stable district map over 14 years",
+              "Age-standardisation barely changed the map of district recall ratios",
+              "Ten measured district characteristics left most of the variation unexplained",
+              "Higher-recall districts recorded no more suspicious judgements at screening",
+              "Regional audit should link recall to reading facilities and cancers"]
+assert all(len(h) <= 85 for h in HIGHLIGHTS), [len(h) for h in HIGHLIGHTS]
 KEYPOINTS = [
  ("Question", "Is uneven recall across Korean districts at national breast screening accounted for by the age mix and measured characteristics of the women's districts?"),
  ("Findings", "Age-standardisation barely changed the district map, substantial spatial variation remained after adjustment for measured characteristics, and higher-recall districts recorded no more suspicious judgements."),
@@ -62,8 +69,8 @@ METHODS = [
  f"The Institutional Review Board of Hongik University approved this retrospective ecological study ({IRB}; continuing review {IRB2}) and waived informed consent because only published aggregate statistics were used; the study followed the Declaration of Helsinki and is reported according to the STROBE statement [@vonelm2007strengthening]. "
  f"It covered all {N['n_districts']} districts (urban wards, cities and counties) of the Republic of Korea, harmonised to 2024 boundaries, from January 2011 to December 2024 ({fmt(N['n_rows'])} district-years). No district-year was excluded."),
 ("Screening programme and data",
- "The national programme invites women aged 40 years or older to biennial mammography [@suh2017trends; @kim2025biennial]. Its published statistics place each examination in one of four judgement categories defined by the programme's quality guidelines: no abnormality (Breast Imaging Reporting and Data System [BI-RADS] category 1), benign finding (category 2), recall ('judgement deferred', additional evaluation required; categories 0 and 3) and suspected breast cancer (categories 4 and 5) [@kim2025biennial]; women with existing breast cancer are reported separately. "
- f"The category definitions did not change during the study period. Nationally, recall fell from {JC.loc[2011,'recall']:.1f}% of examinations in 2011 to {JC.loc[2024,'recall']:.1f}% in 2024 while benign findings rose from {JC.loc[2011,'benign']:.1f}% to {JC.loc[2024,'benign']:.1f}%, and suspected cancer stayed between {JC.suspicious.min():.2f}% and {JC.suspicious.max():.2f}%; recall plus suspected cancer agreed with the published programme recall rate within {JC.diff_pp.abs().max():.1f} percentage points in every year from 2011 to 2020 [@kim2025biennial] (Supplementary Table S1). The decline accelerated after 2017 [@kim2025biennial]; year effects in every model and refits in three periods allowed for this change. "
+ "The national programme invites women aged 40 years or older to biennial mammography [@suh2017trends; @kim2025biennial]. Its published statistics place each examination in one of four judgement categories defined by the programme's quality guidelines: no abnormality (Breast Imaging Reporting and Data System [BI-RADS] category 1), benign finding (category 2), recall ('judgement deferred', additional evaluation required; categories 0 and 3) and suspected breast cancer (categories 4 and 5) [@kim2025biennial]; women with existing breast cancer are reported separately and are not part of the four categories. In this study recall denotes 'judgement deferred', which made up {100*(JC.recall/JC.recall_plus_susp).min():.0f}%–{100*(JC.recall/JC.recall_plus_susp).max():.0f}% of examinations needing further assessment in each year. Counts are women screened in each year, so women screened in several years contribute in each. "
+ f"The published category mapping was applied throughout; changes in its implementation or in reporting practice cannot be excluded. Nationally, recall fell from {JC.loc[2011,'recall']:.2f}% of examinations in 2011 to {JC.loc[2024,'recall']:.2f}% in 2024 while benign findings rose from {JC.loc[2011,'benign']:.1f}% to {JC.loc[2024,'benign']:.1f}%, and suspected cancer stayed between {JC.suspicious.min():.2f}% and {JC.suspicious.max():.2f}%; recall plus suspected cancer agreed with the published programme recall rate (categories 0, 3, 4 and 5) within {JC.diff_pp.abs().max():.1f} percentage points in every year from 2011 to 2020 [@kim2025biennial] (Supplementary Table S1). The decline accelerated after 2017 [@kim2025biennial]; year effects in every model allowed for national changes of this kind, and refits in three periods were examined. "
  "Annual numbers of women screened and of each category by district of residence, national numbers by 5-year age group (40–44 to 85 years or older), and national numbers screened by age came from the National Health Insurance Service through the Korean Statistical Information Service; female populations by district and 5-year age group came from resident registration. "
  "District counts were linked to resident populations by administrative code only, national age-specific rates were applied by age group and year, and district totals were checked against national totals in every year (Figure 1)."),
 ("Outcome and expected recalls",
@@ -73,9 +80,9 @@ METHODS = [
 ("District characteristics",
  "Ten characteristics were fixed before any model was fitted, each with an expected direction (Supplementary Table S2). "
  "Density-related composition was represented by the share of women aged 40–49 years among women aged 40 years or older (expected to raise recall because greater density lowers specificity and is common before menopause) [@carney2003individual], obesity at national health screening (expected to lower recall through less dense tissue, although obesity has also been associated with more recalls) [@elmore2004the] and the tertiary-educated share (expected to raise recall through later and fewer births, which are associated with greater density) [@odriscoll2024reproductive; @al2025education]; these were treated as hypotheses about district proxies, not as measures of density. "
- "The screening setting was represented by breast screening uptake (expected to lower recall because more women have prior mammograms) [@hubbard2011cumulative], clinics per 100 000 residents (expected to raise it through low-volume reading) and general hospitals per 100 000 (expected to lower it) [@cornford2021optimum]; deprivation was represented by the share of basic livelihood security recipients (expected to raise it) [@goldman2011accuracy]. "
- "Physical activity, a common pathway in this district series, was represented by age-standardised walking and moderate-to-vigorous physical activity from the Community Health Survey and by public sports facilities per 100 000 residents, all expected to lower recall through lower breast density, although evidence that activity lowers density is inconsistent [@yaghjyan2012physical; @lee2024physical]. "
- "Five controls were forced into every model: urban population share, physicians per 1000 residents, sex ratio, fiscal autonomy and the share aged 80 years or older. Three negative control exposures with no plausible effect on recall (hit-and-run collisions, a traffic-culture index and fires) were fitted separately [@lipsitch2010negative]. All characteristics were standardised to mean 0 and standard deviation 1."),
+ "The screening setting was represented by breast screening uptake (expected to lower recall because more women have prior mammograms) [@hubbard2011cumulative], clinics per 100 000 residents (expected to raise it through low-volume reading) and general hospitals per 100 000 (expected to lower it) [@cornford2021optimum]; deprivation was represented by the share of basic livelihood security recipients (expected to raise it, as interpretive accuracy has been lower at facilities serving vulnerable women) [@goldman2011accuracy]. "
+ "Physical activity was represented by age-standardised walking and moderate-to-vigorous physical activity from the Community Health Survey and by public sports facilities per 100 000 residents, all expected to lower recall through lower breast density, although evidence that activity lowers density is inconsistent [@yaghjyan2012physical; @lee2024physical]. "
+ "Five controls were forced into every model: urban population share, physicians per 1000 residents, sex ratio, fiscal autonomy and the share aged 80 years or older. Three negative control exposures with no plausible relation to recall (hit-and-run collisions, a traffic-culture index and fires) were fitted separately [@lipsitch2010negative]. All characteristics were standardised to mean 0 and standard deviation 1."),
 ("Statistical analysis",
  f"Five likelihoods (Poisson, negative binomial, zero-inflated Poisson, zero-inflated negative binomial and Poisson with an observation-level effect) and binomial and beta-binomial models were compared with the same random effects (Supplementary Table S3). The principal model was negative binomial, chosen by the pre-specified rule of a lower WAIC than Poisson for the forced-control model [@gelman2014understanding]; the Poisson model with an observation-level effect, which had the lowest WAIC, was refitted with all characteristics as an alternative. "
  "The principal model had an offset of log expected recalls, a Besag–York–Mollié 2 district effect with penalised-complexity priors [@riebler2016an] and random-walk and independent year effects, fitted by INLA in R 4.6.0 [@rue2009approximate]. "
@@ -85,7 +92,7 @@ METHODS = [
  "The 2020 decline in attendance was addressed by refitting without 2020 and by testing interactions of each characteristic with the period from 2020. "
  "Treated breast cancer patients and treated gastric cancer patients in the national health insurance system (age-standardised) were fitted with the same model as comparison outcomes. "
  "Associations opposite to the expected direction were examined post hoc with the existing fits only (between-district and within-district components, lags, refits by period and spatial confounding adjustment), without changing the principal model. "
- "As an auxiliary descriptive analysis, 14-year district SRRs of recall were compared by Spearman correlation with those of suspicious judgements, of treated breast cancer and of cervical cytological abnormality at the same programme (atypical cells or worse among women screened), and the ratio of suspicious judgements to recalls was summarised by quarter of recall SRR."),
+ "As an auxiliary descriptive analysis, 14-year district SRRs of recall were compared by Spearman correlation with those of suspicious judgements, of treated breast cancer and of cervical cytological abnormality at the same programme (atypical cells or worse among women screened), and the ratio of suspicious judgements to recalls was summarised by quartile of recall SRR."),
 ]
 
 def results():
@@ -99,27 +106,27 @@ def results():
     R = [
     ("Screening, recall and age",
      f"All {N['n_districts']} districts contributed 14 years ({fmt(N['n_rows'])} district-years; Figure 1), with {fmt(N['exam_total'])} screening examinations and {fmt(N['cases_total'])} recalls ({pct(N['cases_total']/N['exam_total'])}; Table 1). "
-     f"The national recall rate fell from {N['nat_year'].loc[2011,'rate_pct']:.1f}% in 2011 to {N['nat_year'].loc[2024,'rate_pct']:.1f}% in 2024, and the number screened fell from {fmt(int(N['nat_year'].loc[2019,'exam']))} in 2019 to {fmt(int(N['nat_year'].loc[2020,'exam']))} in 2020 (Figure 2a). "
-     f"Recall declined with age, from {100*c40(2011):.1f}% at 40–44 years to {100*c85(2011):.1f}% at 85 years or older in 2011 and from {100*c40(2024):.1f}% to {100*c85(2024):.1f}% in 2024 (Figure 2b). "
+     f"The national recall rate fell from {N['nat_year'].loc[2011,'rate_pct']:.1f}% in 2011 to {N['nat_year'].loc[2024,'rate_pct']:.1f}% in 2024, and the number screened fell from {fmt(int(N['nat_year'].loc[2019,'exam']))} in 2019 to {fmt(int(N['nat_year'].loc[2020,'exam']))} in 2020 (Figure 2A). "
+     f"Recall declined with age, from {100*c40(2011):.1f}% at 40–44 years to {100*c85(2011):.1f}% at 85 years or older in 2011 and from {100*c40(2024):.1f}% to {100*c85(2024):.1f}% in 2024 (Figure 2B). "
      f"Age-standardised expected recalls differed from crude expected recalls by a factor of {N['E_ratio'][0]:.2f}–{N['E_ratio'][2]:.2f}; the 14-year district SRRs from the two were correlated at ρ = {N['rho_crude_std']:.2f}, and the correlation of the SRR with the share of women aged 40–49 years fell from {N['rho_f40_crude']:.2f} to {N['rho_f40_std']:.2f} after standardisation."),
     ("District pattern",
-     f"Age-standardised district SRRs ranged from {T1['ALL']['p10']:.2f} to {T1['ALL']['p90']:.2f} between the 10th and 90th percentiles (Figure 3a). Moran's I of the pooled log SRR was {N['moran_pooled']:.2f}, and annual values ranged from {N['moran_year'][0]:.2f} to {N['moran_year'][1]:.2f}. "
-     f"District rankings were stable: Spearman correlations of SRRs between 2011–2015, 2016–2019 and 2020–2024 ranged from {N['rho_win'][0]:.2f} to {N['rho_win'][1]:.2f}, and between adjacent years from {min(AX['SIR_rank_rho_adjacent_years'].values()):.2f} to {max(AX['SIR_rank_rho_adjacent_years'].values()):.2f}. "
+     f"Age-standardised district SRRs ranged from {T1['ALL']['p10']:.2f} to {T1['ALL']['p90']:.2f} between the 10th and 90th percentiles (Figure 3A). Moran's I of the pooled log SRR was {N['moran_pooled']:.2f}, and annual values ranged from {N['moran_year'][0]:.2f} to {N['moran_year'][1]:.2f}. "
+     f"Spearman correlations of district SRRs between 2011–2015, 2016–2019 and 2020–2024 ranged from {N['rho_win'][0]:.2f} to {N['rho_win'][1]:.2f}, and between adjacent years from {min(AX['SIR_rank_rho_adjacent_years'].values()):.2f} to {max(AX['SIR_rank_rho_adjacent_years'].values()):.2f}. "
      f"In the principal model the structured share of the district effect (φ) was {N['phi'][0]:.2f} (95% CrI {N['phi'][1]:.2f}–{N['phi'][2]:.2f}), and the residual Moran's I was {N['moran_resid']:.2f}. "
-     f"There were {N['n_hot']} residual hot spots, mainly in {top(N['hot_by_sido'])}, and {N['n_cold']} cold spots, mainly in {top(N['cold_by_sido'])} (Figure 3b, c; Supplementary Table S5). Between-province differences accounted for {100*AX['between_province_share_logSIR_pooled']:.0f}% of the variance of the pooled log SRR."),
+     f"There were {N['n_hot']} residual hot spots, mainly in {top(N['hot_by_sido'])}, and {N['n_cold']} cold spots, mainly in {top(N['cold_by_sido'])} (Figure 3B, C; Supplementary Table S5). Between-province differences accounted for {100*AX['between_province_share_logSIR_pooled']:.0f}% of the variance of the pooled log SRR."),
     ("District characteristics",
      f"In the principal model, nine of the ten characteristics had 95% CrIs that included 1 (Table 2); their RRs per 1 standard deviation lay between {min(M[v][0] for v in HYP if v != NB.FAC):.3f} and {max(M[v][0] for v in HYP if v != NB.FAC):.3f}. "
-     f"Public sports facilities per 100 000 were associated with higher recall ({rr(M[NB.FAC])}), opposite to the expected direction; urban population share and fiscal autonomy among the forced controls were also associated with higher recall ({rr(M['urban_population_share'])}; {rr(M['fiscal_independence'])}). "
-     f"The facility association was credible in all {N['mv']['public_sports_facilities_per_100k']['n_specs']} covariate subsets that contained it (Supplementary Table S4), with the Poisson model with an observation-level effect ({rr(PO(NB.FAC))}), with a province-by-year effect ({rr(C4(NB.FAC))}) and after omission of each province and each year, whereas no other characteristic was credible in any subset. None of the negative control exposures was credible. "
+     f"Public sports facilities per 100 000 were associated with higher recall ({rr(M[NB.FAC])}); urban population share and fiscal autonomy among the forced controls were also associated with higher recall ({rr(M['urban_population_share'])}; {rr(M['fiscal_independence'])}). "
+     f"The facility association was credible in all {N['mv']['public_sports_facilities_per_100k']['n_specs']} covariate subsets that contained it (Table 2), with the Poisson model with an observation-level effect ({rr(PO(NB.FAC))}), with a province-by-year effect ({rr(C4(NB.FAC))}) and after omission of each province and each year, whereas no other characteristic was credible in any subset. None of the negative control exposures was credible. "
      + win_txt),
     ("Public sports facilities (post hoc)",
-     f"In the 14-year district means, public sports facilities per 100 000 were inversely correlated with the recall SRR (ρ = {N['fac_rho']['srr']:.2f}) and strongly correlated with urban population share (ρ = {N['fac_rho']['urb']:.2f}) and population size (ρ = {N['fac_rho']['pop']:.2f}). "
+     f"In the 14-year district means, public sports facilities per 100 000 were inversely correlated with the recall SRR (ρ = {N['fac_rho']['srr']:.2f}) and strongly correlated with urban population share (ρ = {N['fac_rho']['urb']:.2f}) and population size (ρ = {N['fac_rho']['pop']:.2f}); its variance inflation factor in the principal model was {VIF_FAC:.1f}. "
      f"When the association was split into components, the between-district component was not associated with recall ({rr(N['bw'][NB.FAC + '__between'])}), whereas the within-district component was ({rr(N['bw'][NB.FAC + '__within'])}). "
-     f"The association weakened with Knorr-Held space-time interactions that allow district-specific trends (type II {rr(N['s43'][('KH_typeII', NB.FAC)])}; type IV {rr(N['s43'][('KH_typeIV', NB.FAC)])}), was present with 1-year and 2-year lags ({rr(N['s41'][('E1_lag1', NB.FAC)])}; {rr(N['s41'][('E2_lag2', NB.FAC)])}) and was not seen for treated breast cancer ({rr(N['nco'][('BRCA', NB.FAC)])}) or treated gastric cancer ({rr4(N['nco'][('GCA', NB.FAC)])}). "
+     f"With Knorr-Held space-time interactions the association remained credible with types I and III ({rr(N['s43'][('KH_typeI', NB.FAC)])}; {rr(N['s43'][('KH_typeIII', NB.FAC)])}) but not with types II and IV, which allow district-specific trends ({rr(N['s43'][('KH_typeII', NB.FAC)])}; {rr(N['s43'][('KH_typeIV', NB.FAC)])}), was present with 1-year and 2-year lags ({rr(N['s41'][('E1_lag1', NB.FAC)])}; {rr(N['s41'][('E2_lag2', NB.FAC)])}) and had a credible interval including 1 for treated breast cancer ({rr(N['nco'][('BRCA', NB.FAC)])}) or treated gastric cancer ({rr4(N['nco'][('GCA', NB.FAC)])}). "
      f"In period refits the association was credible in 2016–2019 ({rr(N['win'][(NB.FAC, 'W2_2016-19')])}) and 2020–2024 ({rr(N['win'][(NB.FAC, 'W3_2020-24')])}) but not in 2011–2015 ({rr(N['win'][(NB.FAC, 'W1_2011-15')])}). Facilities per 100 000 rose from {N['fac_year'][2011]:.1f} in 2011 to {N['fac_year'][2024]:.1f} in 2024 on average."),
     ("Recall and suspicious judgements",
-     f"Over the 14 years, {fmt(N['sp_total'])} examinations ({100*N['sp_total']/N['exam_total']:.2f}%) were judged suspicious for cancer. District SRRs of recall and of suspicious judgements were not correlated (ρ = {AX['recall_vs_suspicion_rho']:.2f}; Figure 4a). "
-     f"Suspicious judgements per 1000 recalls had a median of {q['Q1']['median']:.1f}, {q['Q2']['median']:.1f}, {q['Q3']['median']:.1f} and {q['Q4']['median']:.1f} from the lowest to the highest quarter of recall SRR (Figure 4b). "
+     f"Over the 14 years, {fmt(N['sp_total'])} examinations ({100*N['sp_total']/N['exam_total']:.2f}%) were judged suspicious for cancer. The Spearman correlation between district SRRs of recall and of suspicious judgements was {RB['rho']:.2f} (95% bootstrap interval {RB['lo']:.2f} to {RB['hi']:.2f}; Figure 4A); the median district recorded {RB['sp_median']:.0f} suspicious judgements over 14 years. "
+     f"The district ratio of suspicious judgements per 1000 recalls, which has recall in its denominator, had a median of {q['Q1']['median']:.1f}, {q['Q2']['median']:.1f}, {q['Q3']['median']:.1f} and {q['Q4']['median']:.1f} from the lowest to the highest quartile of recall SRR (Figure 4B). "
      f"The recall SRR was correlated with the SRR of treated breast cancer (ρ = {AX['recall_vs_BRCA_treated_rho']:.2f}) and of cervical cytological abnormality (ρ = {AX['recall_vs_CXAB_rho']:.2f}), whereas suspicious judgements were not correlated with treated breast cancer (ρ = {AX['suspicion_vs_BRCA_treated_rho']:.2f})."),
     ("Province-level variation and 2020",
      f"With a province-by-year effect, {WORD[ncred_c4]} of the ten characteristics {'was' if ncred_c4 in (0, 1) else 'were'} credible (public sports facilities), and adding care outside the district and hospital beds left {WORD[ncred_si]} credible (Figure 5). "
@@ -138,16 +145,22 @@ def read_draft():
         if cur is not None: S[cur].append(line)
     return {k: [p.strip() for p in "\n".join(v).split("\n\n") if p.strip()] for k, v in S.items()}
 def pandoc_cites(t): return re.sub(r"\s*\[(@[^\]]+)\]", lambda m: " {{" + ",".join(k.strip().lstrip("@") for k in m.group(1).split(";")) + "}}", t)
-def ref(k):   # Sage Vancouver: 저자 3명 넘으면 3명 + et al., 제목. 학술지 약어 연도; 권: 쪽.
+def _ini(n):   # PubMed "Kim DJ" -> "D.J. Kim"
+    p = n.split(); 
+    if len(p) >= 2 and p[-1].isupper() and len(p[-1]) <= 4: return ".".join(p[-1]) + ". " + " ".join(p[:-1])
+    return n
+def ref(k):   # Elsevier 번호 양식: 저자(이니셜. 성), 제목, 학술지 권 (연도) 쪽. https://doi.org/…
     r = REFS[k]
-    if r["type"] == "web": return f"{r['authors']}. {r['title']}, {r['url']} ({r['year']}, accessed {r['accessed']})."
-    au = r["authors"]; a = ", ".join(au) if len(au) <= 3 else ", ".join(au[:3]) + ", et al."
-    a = a if a.endswith(".") else a + "."
+    if r["type"] == "web": return f"{r['authors']}, {r['title']}. {r['url']}, {r['year']} (accessed {r['accessed']})."
+    au = [_ini(a) for a in r["authors"]]; a = ", ".join(au) if len(au) <= 6 else ", ".join(au[:6]) + ", et al."
     t = r["title"].rstrip(".")
-    s = f"{a} {t}. {r['journal']} {r['year']}"
-    if r.get("vol"): s += f"; {r['vol']}"
-    if r.get("pages"): s += f": {r['pages'].replace('-', '–')}"
-    return s + "."
+    s = f"{a}, {t}, {r['journal']}"
+    if r.get("vol"): s += f" {r['vol']}"
+    s += f" ({r['year']})"
+    if r.get("pages"): s += f" {r['pages'].replace('-', '–')}"
+    s += "."
+    if r.get("doi"): s += f" https://doi.org/{r['doi']}."
+    return s
 
 class TX(JKMS):
     raw = False
@@ -185,9 +198,9 @@ def table2():
 FIGCAP = {
  1: "Flow of data. District screening counts were linked to female resident populations by district code, and national age-specific recall and screening rates were applied by age group and year to obtain expected counts; no district-year was excluded.",
  2: "Recall at national breast cancer screening, Republic of Korea, 2011–2024. <b>A</b> National recall per 100 women screened (line) and number screened (bars). <b>B</b> National recall per 100 women screened by 5-year age group in 2011, 2017 and 2024.",
- 3: f"District geography of recall, {N['n_districts']} districts, Republic of Korea, 2011–2024. <b>A</b> Standardised recall ratio (observed over age-standardised expected recalls, 14 years pooled). <b>B</b> Residual spatial rate ratio from the principal model. <b>C</b> Residual hot spots and cold spots (posterior probability of a rate ratio above 1 greater than 0.95 or less than 0.05). Thick lines are province boundaries.",
- 4: f"Recall and examinations judged suspicious for cancer, {N['n_districts']} districts, 2011–2024. <b>A</b> District standardised ratios (observed over age-standardised expected) of recall and of suspicious judgements (log scales; Seoul, Gyeonggi-do and Incheon, and other provinces shown in different colours). <b>B</b> Suspicious judgements per 1000 recalls by quarter of the district standardised recall ratio (bars, median; lines, interquartile range).",
- 5: "Rate ratios per 1 standard deviation with 95% credible intervals for the ten district characteristics across models: principal model, independent province-by-year effect, refit without 2020, crude expected recalls, model adding care outside the district and hospital beds, and the best-fitting Knorr-Held space-time interaction model. The horizontal axis is on a log scale; expected directions in parentheses.",
+ 3: f"District geography of recall, {N['n_districts']} districts, Republic of Korea, 2011–2024. <b>A</b> Standardised recall ratio (observed over age-standardised expected recalls, 14 years pooled). <b>B</b> Residual spatial rate ratio from the principal model. <b>C</b> Residual hot spots and cold spots (posterior probability of a rate ratio above 1 greater than 0.95 or less than 0.05). Thick lines are province boundaries. Map lines delineate study areas and do not necessarily depict accepted national boundaries.",
+ 4: f"Recall and examinations judged suspicious for cancer, {N['n_districts']} districts, 2011–2024. <b>A</b> District standardised ratios (observed over age-standardised expected) of recall and of suspicious judgements (log scales; Seoul, Gyeonggi-do and Incheon, and other provinces shown in different colours). <b>B</b> Suspicious judgements per 1000 recalls by quartile of the district standardised recall ratio (bars, median; lines, interquartile range).",
+ 5: "Rate ratios per 1 standard deviation with 95% credible intervals for the ten district characteristics across models: principal model, independent province-by-year effect, refit without 2020, crude expected recalls, model adding care outside the district and hospital beds, and the Knorr-Held type II space-time interaction model (lowest widely applicable information criterion of the four types). The horizontal axis is on a log scale; expected directions in parentheses.",
 }
 def foot_row(J, text, sz=9, ls=13):
     from docx.enum.text import WD_LINE_SPACING
@@ -201,25 +214,26 @@ def all_keys(D):
     src = json.dumps(METHODS) + json.dumps(D, ensure_ascii=False)
     return sorted({k.strip().lstrip("@") for g in re.findall(r"\[(@[^\]]+)\]", src) for k in g.split(";")})
 
-AUTHOR_CONTRIB = "Seongdae Kim is the sole author and was responsible for conceptualisation, data curation, formal analysis, methodology, software, validation, visualisation, and writing of the original draft and its review and editing."
-def declarations():
-    return [("Ethical considerations", f"The Institutional Review Board of Hongik University approved this study (approval number {IRB}; continuing review {IRB2})."),
-            ("Consent to participate", "The Institutional Review Board of Hongik University waived the requirement for informed consent because only published aggregate statistics without individual information were used."),
-            ("Consent for publication", "Not applicable."),
-            ("Declaration of conflicting interest", "The author declared no potential conflicts of interest with respect to the research, authorship, and/or publication of this article."),
-            ("Funding", "The author received no financial support for the research, authorship, and/or publication of this article."),
-            ("Data availability", data_statement())]
+CREDIT = "Seongdae Kim: Conceptualization, Data curation, Formal analysis, Investigation, Methodology, Project administration, Resources, Software, Validation, Visualization, Writing – original draft, Writing – review and editing."
+FUNDING = "This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors."
+COI = "The author declares no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper."
+AI_DECL = "During the preparation of this work the author used Claude (Anthropic) and ChatGPT (OpenAI) only for translation and English-language editing of the manuscript. After using these tools, the author reviewed and edited the content as needed and takes full responsibility for the content of the published article."
+ETHICS = f"The Institutional Review Board of Hongik University approved this study ({IRB}; continuing review {IRB2}) and waived informed consent because only published aggregate statistics were used."
+def endmatter():
+    return [("CRediT authorship contribution statement", CREDIT), ("Funding", FUNDING), ("Declaration of competing interest", COI), ("Ethics approval", ETHICS), ("Data availability", data_statement()),
+            ("Declaration of generative AI and AI-assisted technologies in the manuscript preparation process", AI_DECL)]
 
 def build(bw=0, aw=0):
-    D = read_draft(); J = TX(cite="sup"); KEYS = all_keys(D)
+    D = read_draft(); J = TX(cite="bracket"); KEYS = all_keys(D)
     J.para(f"<b>{TITLE}</b>")
     J.head("Abstract", 1)
-    for h, t in ABSTRACT: J.para(f"<b>{h}</b> {t}")
-    J.para(f"<b>Keywords</b> {KEYWORDS}", before=6)
+    J.para(ABSTRACT_LEAD)
+    for h, t in ABSTRACT: J.para(f"<b>{h}:</b> {t}")
+    J.para(f"<b>Keywords:</b> {KEYWORDS}", before=6)
     J.page_break(); J.counting = True
     J.head("Introduction", 1)
     for p in D["Introduction"]: J.para(pandoc_cites(p), indent=True)
-    J.head("Methods", 1)
+    J.head("Materials and Methods", 1)
     for x in METHODS:
         J.head(x[0], 2)
         for p in x[1:]: J.para(pandoc_cites(p), indent=True)
@@ -229,19 +243,16 @@ def build(bw=0, aw=0):
         for p in x[1:]: J.para(pandoc_cites(p), indent=True)
     J.head("Discussion", 1)
     for p in D["Discussion"]: J.para(pandoc_cites(p), indent=True)
-    J.head("Conclusions", 1)
+    J.head("Conclusion", 1)
     for p in D["Conclusions"]: J.para(pandoc_cites(p), indent=True)
     J.counting = False
-    J.head("Acknowledgements", 1); J.para(AI_STATEMENT)
-    J.head("Author contributions", 1); J.para(AUTHOR_CONTRIB)
-    J.head("Statements and Declarations", 1)
-    for h, t in declarations(): J.head(h, 2); J.para(t)
+    for h, t in endmatter(): J.head(h, 1); J.para(t)
     assert sorted(J.cites) == KEYS, (set(J.cites) ^ set(KEYS))
     J.page_break(); J.head("References", 1); J.raw = True; rl = []
-    for i, k in enumerate(J.cites, 1): s = f"{i}. " + ref(k); rl.append(s); J.para(s)
+    for i, k in enumerate(J.cites, 1): s = f"[{i}] " + ref(k); rl.append(s); J.para(s)
     J.raw = False
-    J.page_break(); J.head("Figure legends", 1)
-    for k in sorted(FIGCAP): J.para(f"<b>Figure {k}.</b> {FIGCAP[k]}", after=6)
+    J.page_break(); J.head("Figure captions", 1)
+    for k in sorted(FIGCAP): J.para(f"<b>Fig. {k}.</b> {FIGCAP[k]}", after=6)
     J.page_break(); put_table(J, table1())
     J.new_page("landscape"); put_table(J, table2(), fs=8)
     return J, rl, D, KEYS
@@ -249,27 +260,27 @@ def build(bw=0, aw=0):
 def docx_bw(path):
     from docx import Document
     t = "\n".join(x.text for x in Document(path).paragraphs)
-    i = t.find("\nIntroduction\n"); j = t.find("\nAcknowledgements\n"); assert 0 < i < j; return len(t[i:j].split())
+    i = t.find("\nIntroduction\n"); j = t.find("\nCRediT authorship contribution statement\n"); assert 0 < i < j; return len(t[i:j].split())
 def intro_words(D): return sum(len(re.sub(r"\[@[^\]]+\]", "", p).split()) for p in D["Introduction"])
 
-def title_page(bw, aw, nref):
-    T = TX(cite="sup"); T.para(f"<b>{TITLE}</b>"); T.para("Seongdae Kim", before=12); T.para(AFFIL)
+def title_page():
+    T = TX(cite="bracket"); T.para(f"<b>{TITLE}</b>"); T.para("Seongdae Kim<sup>a</sup>", before=12)
+    T.para(f"<sup>a</sup>{ADDRESS}")
     T.para(f"<b>Corresponding author:</b> Seongdae Kim, {ADDRESS}. Email: kimsd@hongik.ac.kr. ORCID: {ORCID}", before=12)
-    T.para(f"<b>Word counts:</b> main text {bw} words; abstract {aw} words. <b>Tables:</b> 2. <b>Figures:</b> 5. <b>References:</b> {nref}. Supplementary material: one file (Appendix S1 and Tables S1–S5) and the STROBE checklist.", before=12)
-    T.para(f"<b>Keywords:</b> {KEYWORDS}", before=6)
-    T.head("Acknowledgements", 1); T.para(AI_STATEMENT)
-    T.head("Author contributions", 1); T.para(AUTHOR_CONTRIB)
-    T.head("Statements and Declarations", 1)
-    for h, t in declarations(): T.head(h, 2); T.para(t)
-    T.doc_title = "Title page"; T.save(os.path.join(OUT, "Title_Page_JMS_BRRC.docx"))
-    subprocess.run(["/opt/homebrew/bin/soffice", "--headless", "-env:UserInstallation=file:///tmp/lo_brrc_tp", "--convert-to", "pdf", "--outdir", OUT, os.path.join(OUT, "Title_Page_JMS_BRRC.docx")], capture_output=True)
+    T.doc_title = "Title page"; T.save(os.path.join(OUT, "Title_Page_CBC_BRRC.docx"))
+    subprocess.run(["/opt/homebrew/bin/soffice", "--headless", "-env:UserInstallation=file:///tmp/lo_brrc_tpc", "--convert-to", "pdf", "--outdir", OUT, os.path.join(OUT, "Title_Page_CBC_BRRC.docx")], capture_output=True)
+def highlights():
+    from docx import Document
+    d = Document(); d.add_paragraph().add_run("Highlights").bold = True
+    for h in HIGHLIGHTS: d.add_paragraph(brit(h), style="List Bullet")
+    d.core_properties.author = "Seongdae Kim"; d.core_properties.title = "Highlights"; d.save(os.path.join(OUT, "Highlights_CBC_BRRC.docx"))
 
 if __name__ == "__main__":
-    p = os.path.join(OUT, "Manuscript_JMS_BRRC.docx")
-    aw = sum(len(t.split()) for _, t in ABSTRACT) + sum(len(h.split()) for h, _ in ABSTRACT)
+    p = os.path.join(OUT, "Manuscript_CBC_BRRC.docx")
+    aw = len(ABSTRACT_LEAD.split()) + sum(len(t.split()) for _, t in ABSTRACT) + sum(len(h.split()) for h, _ in ABSTRACT)
     J, rl, D, KEYS = build(); J.save(p); bw = docx_bw(p)
-    title_page(bw, aw, len(KEYS)); iw = intro_words(D)
-    open(os.path.join(OUT, "wordcount_jms.txt"), "w").write(f"body_words={bw}\nabstract_words={aw}\nintro_words={iw}\nrefs={len(KEYS)}\ntables=2\nfigures=5\ntitle_words={len(TITLE.split())}\nkeywords={len(KEYWORDS.split(';'))}\n")
+    title_page(); highlights(); iw = intro_words(D)
+    open(os.path.join(OUT, "wordcount_cbc.txt"), "w").write(f"body_words={bw}\nabstract_words={aw}\nintro_words={iw}\nrefs={len(KEYS)}\ntables=2\nfigures=5\ntitle_words={len(TITLE.split())}\nkeywords={len(KEYWORDS.split(';'))}\nhighlights_max={max(len(h) for h in HIGHLIGHTS)}\n")
     open(os.path.join(OUT, "reference_list.txt"), "w").write("\n".join(rl) + "\n")
     print(f"body {bw} | abstract {aw} | intro {iw} | refs {len(KEYS)}")
-    assert bw <= 4000 and aw <= 250 and len(KEYWORDS.split(";")) >= 4
+    assert 2000 <= bw <= 8000 and aw <= 250 and 1 <= len(KEYWORDS.split(";")) <= 7 and len(KEYS) <= 80
