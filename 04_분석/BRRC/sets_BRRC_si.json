@@ -1,0 +1,184 @@
+{
+ "tag": "BRRC",
+ "outcome_column": "ext__brrc_recalls",
+ "outcome_label_en": "Women recalled for further assessment ('judgement deferred', recall) at national breast cancer screening (NHIS, annual, place of residence; KOSIS DT_35007_N017)",
+ "disease_en": "Breast screening recall",
+ "disease_ko": "유방암 검진 판정유보(재검 필요)",
+ "forced": [
+  "eloc__DT_1YL20421E__1인당도시지역면적현황__도시지역인구",
+  "eloc__DT_1YL20981__인구천명당의료기관종사의사수＜br＞(A÷B×1000)",
+  "eloc__DT_1YL20701__남녀성비＜br＞(A÷B×100)",
+  "eloc__DT_1YL20891__재정자주도(세입과목개편전)",
+  "ext__pop80_share"
+ ],
+ "negative_controls": [
+  "eloc__DT_1YL13901__뺑소니교통사고율＜br＞(A÷B×100)",
+  "eloc__DT_1YL20331__지수__계",
+  "eloc__DT_1YL21081__주민만명당화재발생건수＜br＞(A÷B×10000)"
+ ],
+ "offset_E_column": "E_agestd",
+ "offset_E_file": "BRRC_Eage.csv",
+ "offset_E_label": "age-standardised E, 10 bands 40-44 to 85+ (national age-specific recall rates, DT_35007_N018, applied to the district examinee age mix estimated from female population x national age-specific screening intensity, DT_35007_N010)",
+ "graph": "593-edge contact graph (BRCA 2026-11-04 graph_audit), ST_GRAPH=04_분석/BRRC/graph_593.graph",
+ "population_override": [
+  {
+   "year": 2023,
+   "fbd_region": "경상남도창원시",
+   "population": 1009038,
+   "source": "KOSIS DT_1YL20651E 2023 통합창원시 계; FBD_DATA_ZIP/2023.csv 창원 블록이 2022값 복사(유방암 11/4 population_final_audit)"
+  }
+ ],
+ "sensitivity_only_extra": [
+  "ext__outside_care_share",
+  "ext__beds_per_1000"
+ ],
+ "sets": {
+  "S1_narrative_full": [
+   "ext__f4049_share",
+   "chk__정상B_비만관리_수검자대비비율",
+   "ext__tertiary_educated_share",
+   "ext__breast_uptake",
+   "ext__clinics_per_100k",
+   "ext__general_hospitals_per_100k",
+   "ext__basic_livelihood_rate",
+   "kchs__DT_H_EX_WALK__SR",
+   "kchs__DT_H_EX_PHY__SR",
+   "fac__total",
+   "ext__outside_care_share",
+   "ext__beds_per_1000"
+  ],
+  "S2_activity": [
+   "kchs__DT_H_EX_WALK__SR",
+   "kchs__DT_H_EX_PHY__SR",
+   "fac__total"
+  ],
+  "S3_density_host": [
+   "ext__f4049_share",
+   "chk__정상B_비만관리_수검자대비비율",
+   "ext__tertiary_educated_share",
+   "kchs__DT_H_EX_WALK__SR",
+   "kchs__DT_H_EX_PHY__SR",
+   "fac__total"
+  ],
+  "S4_reading_process": [
+   "ext__breast_uptake",
+   "ext__clinics_per_100k",
+   "ext__general_hospitals_per_100k",
+   "kchs__DT_H_EX_WALK__SR",
+   "kchs__DT_H_EX_PHY__SR",
+   "fac__total"
+  ],
+  "S5_core": [
+   "ext__f4049_share",
+   "ext__breast_uptake",
+   "ext__clinics_per_100k",
+   "kchs__DT_H_EX_WALK__SR",
+   "kchs__DT_H_EX_PHY__SR",
+   "fac__total"
+  ]
+ },
+ "transform": {
+  "eloc__DT_1YL20421E__1인당도시지역면적현황__도시지역인구": "share_of_pop(도시지역인구÷population(마스터))",
+  "eloc__DT_1YL20981__인구천명당의료기관종사의사수＜br＞(A÷B×1000)": "none",
+  "eloc__DT_1YL20701__남녀성비＜br＞(A÷B×100)": "none",
+  "eloc__DT_1YL20891__재정자주도(세입과목개편전)": "none",
+  "ext__pop80_share": "none",
+  "eloc__DT_1YL13901__뺑소니교통사고율＜br＞(A÷B×100)": "none",
+  "eloc__DT_1YL20331__지수__계": "none",
+  "eloc__DT_1YL21081__주민만명당화재발생건수＜br＞(A÷B×10000)": "none",
+  "ext__f4049_share": "none",
+  "chk__정상B_비만관리_수검자대비비율": "none",
+  "ext__tertiary_educated_share": "none",
+  "ext__breast_uptake": "none",
+  "ext__clinics_per_100k": "none",
+  "ext__general_hospitals_per_100k": "none",
+  "ext__basic_livelihood_rate": "none",
+  "ext__outside_care_share": "none",
+  "ext__beds_per_1000": "none",
+  "kchs__DT_H_EX_WALK__SR": "none",
+  "kchs__DT_H_EX_PHY__SR": "none",
+  "fac__total": "per100k"
+ },
+ "expected_direction": {
+  "ext__f4049_share": "+",
+  "chk__정상B_비만관리_수검자대비비율": "-",
+  "ext__tertiary_educated_share": "+",
+  "ext__breast_uptake": "-",
+  "ext__clinics_per_100k": "+",
+  "ext__general_hospitals_per_100k": "-",
+  "ext__basic_livelihood_rate": "+",
+  "kchs__DT_H_EX_WALK__SR": "-",
+  "kchs__DT_H_EX_PHY__SR": "-",
+  "fac__total": "-"
+ },
+ "evidence": {
+  "ext__f4049_share": "(문헌 단계에서 PMID 확인)",
+  "chk__정상B_비만관리_수검자대비비율": "(문헌 단계에서 PMID 확인)",
+  "ext__tertiary_educated_share": "(문헌 단계에서 PMID 확인)",
+  "ext__breast_uptake": "(문헌 단계에서 PMID 확인)",
+  "ext__clinics_per_100k": "(문헌 단계에서 PMID 확인)",
+  "ext__general_hospitals_per_100k": "(문헌 단계에서 PMID 확인)",
+  "ext__basic_livelihood_rate": "(문헌 단계에서 PMID 확인)",
+  "kchs__DT_H_EX_WALK__SR": "(체육 경로 공통 변수)",
+  "kchs__DT_H_EX_PHY__SR": "(체육 경로 공통 변수)",
+  "fac__total": "(체육 경로 공통 변수)"
+ },
+ "rules": {
+  "likelihood": "forced-only 모형 WAIC 낮은 쪽(Poisson/NB)",
+  "set_choice": "WAIC 최소, 4 이내면 변수 적은 세트",
+  "credible": "95% CrI 1 제외",
+  "vif_drop": 10,
+  "multiverse_specs": 200,
+  "main_model_note": "Principal model = S1_narrative_full (10 district characteristics + 5 forced controls). VIF>10 retained and reported.",
+  "main_set": "S1_narrative_full",
+  "vif_action": "report"
+ },
+ "note": "Outcome: women recalled (judgement deferred) at national breast cancer screening per examinee. Covariates fixed before fitting: density-related composition (share of women aged 40-49 among women aged 40+, measured obesity at health screening, tertiary education), screening and reading process (breast screening uptake, clinics per 100,000, general hospitals per 100,000), deprivation (basic livelihood security recipients) and physical activity (walking, moderate-to-vigorous physical activity, public sports facilities per 100,000); five forced controls; negative control exposures hit-and-run collisions, traffic-culture index and fires; comparison outcomes breast cancer patients and gastric cancer patients.",
+ "extra_columns": {
+  "ext__brrc_recalls": [
+   "EXT_canonical_pool_BRRC_261113.csv",
+   "brrc_recalls"
+  ],
+  "ext__pop80_share": [
+   "EXT_canonical_pool_BRRC_261113.csv",
+   "pop80_share"
+  ],
+  "ext__f4049_share": [
+   "EXT_canonical_pool_BRRC_261113.csv",
+   "f4049_share"
+  ],
+  "ext__tertiary_educated_share": [
+   "EXT_canonical_pool_BRRC_261113.csv",
+   "tertiary_educated_share"
+  ],
+  "ext__breast_uptake": [
+   "EXT_canonical_pool_BRRC_261113.csv",
+   "breast_uptake"
+  ],
+  "ext__clinics_per_100k": [
+   "EXT_canonical_pool_BRRC_261113.csv",
+   "clinics_per_100k"
+  ],
+  "ext__general_hospitals_per_100k": [
+   "EXT_canonical_pool_BRRC_261113.csv",
+   "general_hospitals_per_100k"
+  ],
+  "ext__basic_livelihood_rate": [
+   "EXT_canonical_pool_BRRC_261113.csv",
+   "basic_livelihood_rate"
+  ],
+  "ext__outside_care_share": [
+   "EXT_canonical_pool_BRRC_261113.csv",
+   "outside_care_share"
+  ],
+  "ext__beds_per_1000": [
+   "EXT_canonical_pool_BRRC_261113.csv",
+   "beds_per_1000"
+  ],
+  "ext__brst_examinees": [
+   "EXT_canonical_pool_BRRC_261113.csv",
+   "brst_examinees"
+  ]
+ },
+ "offset": "ext__brst_examinees"
+}

@@ -1,0 +1,412 @@
+{
+ "tag": "BRRC",
+ "outcome_column": "ext__brrc_recalls",
+ "outcome_label_en": "Women recalled for further assessment ('judgement deferred', recall) at national breast cancer screening (NHIS, annual, place of residence; KOSIS DT_35007_N017)",
+ "disease_ko": "유방암 검진 판정유보(재검 필요)",
+ "disease_en": "Breast screening recall",
+ "forced": [
+  "urban_population_share",
+  "physicians_per_1000",
+  "sex_ratio",
+  "fiscal_independence",
+  "pop80_share"
+ ],
+ "candidates": [
+  "ext__f4049_share",
+  "screening_normalB_obesity_share",
+  "tertiary_educated_share",
+  "ext__breast_uptake",
+  "ext__clinics_per_100k",
+  "ext__general_hospitals_per_100k",
+  "basic_livelihood_rate",
+  "walking_practice_rate",
+  "moderate_pa_rate",
+  "public_sports_facilities_per_100k"
+ ],
+ "negative_controls": [
+  "hit_and_run_rate",
+  "traffic_culture_index",
+  "fires_per_10000"
+ ],
+ "sets": {
+  "S1_narrative_full": [
+   "ext__f4049_share",
+   "screening_normalB_obesity_share",
+   "tertiary_educated_share",
+   "ext__breast_uptake",
+   "ext__clinics_per_100k",
+   "ext__general_hospitals_per_100k",
+   "basic_livelihood_rate",
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k"
+  ],
+  "S2_activity": [
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k"
+  ],
+  "S3_density_host": [
+   "ext__f4049_share",
+   "screening_normalB_obesity_share",
+   "tertiary_educated_share",
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k"
+  ],
+  "S4_reading_process": [
+   "ext__breast_uptake",
+   "ext__clinics_per_100k",
+   "ext__general_hospitals_per_100k",
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k"
+  ],
+  "S5_core": [
+   "ext__f4049_share",
+   "ext__breast_uptake",
+   "ext__clinics_per_100k",
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k"
+  ],
+  "S1b_obesity_sensitivity": [
+   "ext__f4049_share",
+   "screening_normalB_obesity_share",
+   "tertiary_educated_share",
+   "ext__breast_uptake",
+   "ext__clinics_per_100k",
+   "ext__general_hospitals_per_100k",
+   "basic_livelihood_rate",
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k",
+   "obesity_rate"
+  ]
+ },
+ "sensitivity_sets": [
+  "S1b_obesity_sensitivity"
+ ],
+ "sensitivity_only_vars": [
+  "obesity_rate",
+  "outside_care_share",
+  "ext__beds_per_1000"
+ ],
+ "offset_column": "ext__brst_examinees",
+ "offset_sensitivity": null,
+ "offset_fallback": null,
+ "exclude_years": [],
+ "vars": {
+  "urban_population_share": {
+   "key": "urban_population_share",
+   "column": "eloc__DT_1YL20421E__1인당도시지역면적현황__도시지역인구",
+   "transform": "pct_of_pop",
+   "label_en": "Urban-zone population share (%)",
+   "label_ko": "도시지역 인구 비율",
+   "expected_direction": "",
+   "role": "forced",
+   "raw_key": "eloc__DT_1YL20421E__1인당도시지역면적현황__도시지역인구"
+  },
+  "physicians_per_1000": {
+   "key": "physicians_per_1000",
+   "column": "eloc__DT_1YL20981__인구천명당의료기관종사의사수＜br＞(A÷B×1000)",
+   "transform": "none",
+   "label_en": "Physicians per 1000",
+   "label_ko": "인구 천명당 의사 수",
+   "expected_direction": "",
+   "role": "forced",
+   "raw_key": "eloc__DT_1YL20981__인구천명당의료기관종사의사수＜br＞(A÷B×1000)"
+  },
+  "sex_ratio": {
+   "key": "sex_ratio",
+   "column": "eloc__DT_1YL20701__남녀성비＜br＞(A÷B×100)",
+   "transform": "none",
+   "label_en": "Sex ratio (men per 100 women)",
+   "label_ko": "남녀성비",
+   "expected_direction": "",
+   "role": "forced",
+   "raw_key": "eloc__DT_1YL20701__남녀성비＜br＞(A÷B×100)"
+  },
+  "fiscal_independence": {
+   "key": "fiscal_independence",
+   "column": "eloc__DT_1YL20891__재정자주도(세입과목개편전)",
+   "transform": "none",
+   "label_en": "Fiscal independence (%)",
+   "label_ko": "재정자주도",
+   "expected_direction": "",
+   "role": "forced",
+   "raw_key": "eloc__DT_1YL20891__재정자주도(세입과목개편전)"
+  },
+  "pop80_share": {
+   "key": "pop80_share",
+   "column": "ext__pop80_share",
+   "transform": "none",
+   "label_en": "Population aged 80+ share (%)",
+   "label_ko": "80세 이상 인구 비율",
+   "expected_direction": "",
+   "role": "forced",
+   "raw_key": "ext__pop80_share"
+  },
+  "ext__f4049_share": {
+   "key": "ext__f4049_share",
+   "column": "ext__f4049_share",
+   "transform": "none",
+   "label_en": "ext__f4049_share",
+   "label_ko": "ext__f4049_share",
+   "expected_direction": "+ (40세 이상 여자 중 40대 비율: 치밀 유방은 폐경 전 연령에 많아 맘모그래피 민감도가 낮고 추가 검사 판정이 늘어남; 주 E가 연령을 표준화하므로 잔여 연령 구성 점검)",
+   "role": "candidate",
+   "raw_key": "ext__f4049_share"
+  },
+  "screening_normalB_obesity_share": {
+   "key": "screening_normalB_obesity_share",
+   "column": "chk__정상B_비만관리_수검자대비비율",
+   "transform": "none",
+   "label_en": "Screening normal-B obesity-management share (%)",
+   "label_ko": "검진 정상B 비만관리 비율",
+   "expected_direction": "- (검진 측정 비만: 지방형 유방은 치밀도가 낮아 판정유보 감소)",
+   "role": "candidate",
+   "raw_key": "chk__정상B_비만관리_수검자대비비율"
+  },
+  "tertiary_educated_share": {
+   "key": "tertiary_educated_share",
+   "column": "ext__tertiary_educated_share",
+   "transform": "none",
+   "label_en": "Tertiary-educated share (%)",
+   "label_ko": "고등교육 이수 비율",
+   "expected_direction": "+ (고등교육 비율: 늦은 첫 출산·적은 출산으로 치밀 유방, 추가 검사 요구)",
+   "role": "candidate",
+   "raw_key": "ext__tertiary_educated_share"
+  },
+  "ext__breast_uptake": {
+   "key": "ext__breast_uptake",
+   "column": "ext__breast_uptake",
+   "transform": "none",
+   "label_en": "ext__breast_uptake",
+   "label_ko": "ext__breast_uptake",
+   "expected_direction": "- (유방암 검진 수검률: 반복 수검자가 많아 이전 영상과 비교 가능 → 판정유보 감소; 첫 수검 비중이 높을수록 증가)",
+   "role": "candidate",
+   "raw_key": "ext__breast_uptake"
+  },
+  "ext__clinics_per_100k": {
+   "key": "ext__clinics_per_100k",
+   "column": "ext__clinics_per_100k",
+   "transform": "none",
+   "label_en": "ext__clinics_per_100k",
+   "label_ko": "ext__clinics_per_100k",
+   "expected_direction": "+ (의원 밀도: 의원급 소량 판독·이중 판독 부재 → 판정유보 증가)",
+   "role": "candidate",
+   "raw_key": "ext__clinics_per_100k"
+  },
+  "ext__general_hospitals_per_100k": {
+   "key": "ext__general_hospitals_per_100k",
+   "column": "ext__general_hospitals_per_100k",
+   "transform": "none",
+   "label_en": "ext__general_hospitals_per_100k",
+   "label_ko": "ext__general_hospitals_per_100k",
+   "expected_direction": "- (종합병원 밀도: 대량 판독·전문 영상의학 판독 → 판정유보 감소)",
+   "role": "candidate",
+   "raw_key": "ext__general_hospitals_per_100k"
+  },
+  "basic_livelihood_rate": {
+   "key": "basic_livelihood_rate",
+   "column": "ext__basic_livelihood_rate",
+   "transform": "none",
+   "label_en": "Basic-livelihood security recipient rate (%)",
+   "label_ko": "국민기초생활보장 수급자 비율",
+   "expected_direction": "+ (기초생활 수급률: 불규칙 수검·이전 영상 부재·영상 품질)",
+   "role": "candidate",
+   "raw_key": "ext__basic_livelihood_rate"
+  },
+  "walking_practice_rate": {
+   "key": "walking_practice_rate",
+   "column": "kchs__DT_H_EX_WALK__SR",
+   "transform": "none",
+   "label_en": "Walking practice rate (SR %)",
+   "label_ko": "걷기 실천율",
+   "expected_direction": "- (걷기 실천: 체육 경로 — 신체활동과 체성분·유방 조직 구성)",
+   "role": "candidate",
+   "raw_key": "kchs__DT_H_EX_WALK__SR"
+  },
+  "moderate_pa_rate": {
+   "key": "moderate_pa_rate",
+   "column": "kchs__DT_H_EX_PHY__SR",
+   "transform": "none",
+   "label_en": "Moderate-or-higher physical activity rate (SR %)",
+   "label_ko": "중강도 이상 신체활동 실천율",
+   "expected_direction": "- (중강도 신체활동: 체육 경로)",
+   "role": "candidate",
+   "raw_key": "kchs__DT_H_EX_PHY__SR"
+  },
+  "public_sports_facilities_per_100k": {
+   "key": "public_sports_facilities_per_100k",
+   "column": "fac__total",
+   "transform": "per100k",
+   "label_en": "Public sports facilities per 100k",
+   "label_ko": "공공체육시설 수(10만 명당)",
+   "expected_direction": "- (공공체육시설 밀도: 체육 경로)",
+   "role": "candidate",
+   "raw_key": "fac__total"
+  },
+  "obesity_rate": {
+   "key": "obesity_rate",
+   "column": "kchs__DT_H_OBE_OBE__SR",
+   "transform": "none",
+   "label_en": "Obesity rate (self-reported SR %)",
+   "label_ko": "비만율(자가보고)",
+   "expected_direction": "",
+   "role": "candidate_sensitivity",
+   "raw_key": "kchs__DT_H_OBE_OBE__SR"
+  },
+  "outside_care_share": {
+   "key": "outside_care_share",
+   "column": "ext__outside_care_share",
+   "transform": "none",
+   "label_en": "Out-of-district outpatient share (%)",
+   "label_ko": "관외 외래 진료 비율",
+   "expected_direction": "",
+   "role": "candidate_sensitivity",
+   "raw_key": "ext__outside_care_share"
+  },
+  "ext__beds_per_1000": {
+   "key": "ext__beds_per_1000",
+   "column": "ext__beds_per_1000",
+   "transform": "none",
+   "label_en": "ext__beds_per_1000",
+   "label_ko": "ext__beds_per_1000",
+   "expected_direction": "",
+   "role": "candidate_sensitivity",
+   "raw_key": "ext__beds_per_1000"
+  },
+  "hit_and_run_rate": {
+   "key": "hit_and_run_rate",
+   "column": "eloc__DT_1YL13901__뺑소니교통사고율＜br＞(A÷B×100)",
+   "transform": "none",
+   "label_en": "Hit-and-run traffic accident rate (%)",
+   "label_ko": "뺑소니 교통사고율",
+   "expected_direction": "",
+   "role": "negative",
+   "raw_key": "eloc__DT_1YL13901__뺑소니교통사고율＜br＞(A÷B×100)"
+  },
+  "traffic_culture_index": {
+   "key": "traffic_culture_index",
+   "column": "eloc__DT_1YL20331__지수__계",
+   "transform": "none",
+   "label_en": "Traffic culture index",
+   "label_ko": "교통문화지수",
+   "expected_direction": "",
+   "role": "negative",
+   "raw_key": "eloc__DT_1YL20331__지수__계"
+  },
+  "fires_per_10000": {
+   "key": "fires_per_10000",
+   "column": "eloc__DT_1YL21081__주민만명당화재발생건수＜br＞(A÷B×10000)",
+   "transform": "none",
+   "label_en": "Fires per 10000 residents",
+   "label_ko": "주민 만명당 화재 건수",
+   "expected_direction": "",
+   "role": "negative",
+   "raw_key": "eloc__DT_1YL21081__주민만명당화재발생건수＜br＞(A÷B×10000)"
+  }
+ },
+ "rules": {
+  "waic_tol": 4.0,
+  "cpo_fail_frac": 0.05,
+  "main_set": "S1_narrative_full",
+  "vif_threshold": 10.0,
+  "vif_action": "report",
+  "multiverse_n": 200,
+  "windows": {
+   "W1_2011-15": [
+    2011,
+    2015
+   ],
+   "W2_2016-19": [
+    2016,
+    2019
+   ],
+   "W3_2020-24": [
+    2020,
+    2024
+   ]
+  },
+  "covid_post_from": 2020,
+  "years": [
+   2011,
+   2024
+  ],
+  "raw_rules": {
+   "likelihood": "forced-only 모형 WAIC 낮은 쪽(Poisson/NB)",
+   "set_choice": "WAIC 최소, 4 이내면 변수 적은 세트",
+   "credible": "95% CrI 1 제외",
+   "vif_drop": 10,
+   "multiverse_specs": 200,
+   "main_model_note": "v1 체육 경로: 주모형 = S1(판정 기전 7 + 신체활동 3 + 강제 5). 신체활동 3개 중 하나라도 credible이면 계속, 전부 null이면 v2(sets_BRRC_std3_v2.json)로 체인 전체 재실행(런북 15 6-B, 25 §3).",
+   "main_set": "S1_narrative_full",
+   "vif_action": "report"
+  },
+  "main_model_note": "Principal model = S1_narrative_full (10 district characteristics + 5 forced controls). VIF>10 retained and reported."
+ },
+ "note": "Outcome: women recalled (judgement deferred) at national breast cancer screening per examinee. Covariates fixed before fitting: density-related composition (share of women aged 40-49 among women aged 40+, measured obesity at health screening, tertiary education), screening and reading process (breast screening uptake, clinics per 100,000, general hospitals per 100,000), deprivation (basic livelihood security recipients) and physical activity (walking, moderate-to-vigorous physical activity, public sports facilities per 100,000); five forced controls; negative control exposures hit-and-run collisions, traffic-culture index and fires; comparison outcomes breast cancer patients and gastric cancer patients.",
+ "source_json": "sets_BRRC_std3.json",
+ "suffix": "_std3",
+ "offset_E_column": "E_agestd",
+ "offset_E_file": "BRRC_Eage.csv",
+ "offset_E_sensitivity_column": null,
+ "offset_E_label": "age-standardised E, 10 bands 40-44 to 85+ (national age-specific recall rates, DT_35007_N018, applied to the district examinee age mix estimated from female population x national age-specific screening intensity, DT_35007_N010)",
+ "sets_after_vif": {
+  "S1_narrative_full": [
+   "ext__f4049_share",
+   "screening_normalB_obesity_share",
+   "tertiary_educated_share",
+   "ext__breast_uptake",
+   "ext__clinics_per_100k",
+   "ext__general_hospitals_per_100k",
+   "basic_livelihood_rate",
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k"
+  ],
+  "S2_activity": [
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k"
+  ],
+  "S3_density_host": [
+   "ext__f4049_share",
+   "screening_normalB_obesity_share",
+   "tertiary_educated_share",
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k"
+  ],
+  "S4_reading_process": [
+   "ext__breast_uptake",
+   "ext__clinics_per_100k",
+   "ext__general_hospitals_per_100k",
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k"
+  ],
+  "S5_core": [
+   "ext__f4049_share",
+   "ext__breast_uptake",
+   "ext__clinics_per_100k",
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k"
+  ],
+  "S1b_obesity_sensitivity": [
+   "ext__f4049_share",
+   "screening_normalB_obesity_share",
+   "tertiary_educated_share",
+   "ext__breast_uptake",
+   "ext__clinics_per_100k",
+   "ext__general_hospitals_per_100k",
+   "basic_livelihood_rate",
+   "walking_practice_rate",
+   "moderate_pa_rate",
+   "public_sports_facilities_per_100k",
+   "obesity_rate"
+  ]
+ }
+}
